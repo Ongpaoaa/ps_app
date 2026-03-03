@@ -107,3 +107,8 @@ For production, update these to your Supabase project URL.
 - Start local Supabase in pseed project: `npx supabase start`
 - Seeds must have `seed_type = 'pathlab'` to appear in the app
 - Node types: `text`, `video`, `quiz`, `assessment`, `project`, `file_upload`, `end`
+
+## Versioning Policy (For AI Agents)
+
+- On every shipped app update, bump `expo.version` in `app.json`.
+- Keep the Profile footer version label sourced from Expo config (`Constants.expoConfig.version`), not hardcoded.
