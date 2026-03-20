@@ -31,16 +31,16 @@ path_content / path_assessments → path_quiz_questions
 |-------|-----------|-------|
 | `expert_profiles` | `id`, `name`, `title`, `company`, `field_category`, `interview_data` (JSONB), `interview_transcript` (JSONB), `status` | status: pending/approved/rejected/claimed |
 | `expert_pathlabs` | `expert_profile_id`, `seed_id`, `path_id`, `generation_status` | generation_status: pending/generating/completed/failed |
-| `seeds` | `id`, `map_id`, `title`, `description`, `seed_type`, `category_id` | seed_type: collaborative/pathlab |
+| `seeds` | `id`, `map_id` (REQUIRED), `title`, `description`, `seed_type`, `category_id` | seed_type: collaborative/pathlab |
 | `seed_categories` | `id`, `name`, `logo_url` | |
 | `seed_npc_avatars` | `seed_id`, `name`, `svg_data`, `description` | NPC guide for PathLab |
 | `paths` | `id`, `seed_id`, `total_days`, `created_by` | One path per seed |
-| `path_days` | `id`, `path_id`, `day_number`, `context_text`, `reflection_prompts` (JSONB) | |
-| `path_activities` | `id`, `path_day_id`, `title`, `instructions`, `activity_type`, `display_order` | activity_type: learning/reflection/milestone/checkpoint/journal_prompt |
-| `path_content` | `id`, `activity_id`, `content_type`, `content_title`, `content_url`, `content_body` | content_type: video/canva_slide/text/image/pdf/resource_link/daily_prompt/reflection_card |
-| `path_assessments` | `id`, `activity_id`, `assessment_type`, `metadata` | assessment_type: quiz/text_answer/file_upload/daily_reflection/interest_rating |
-| `path_quiz_questions` | `id`, `assessment_id`, `question_text`, `options` (JSONB), `correct_option` | |
-| `map_nodes` | `id`, `map_id`, `title`, `instructions`, `difficulty` | Legacy node system |
+| `path_days` | `id`, `path_id`, `day_number`, `context_text`, `reflection_prompts` (ARRAY) | |
+| `path_activities` | `id`, `path_day_id`, `title`, `instructions`, `display_order`, `is_required`, `is_draft` | NO activity_type column - type determined by path_content.content_type |
+| `path_content` | `id`, `activity_id`, `content_type`, `content_title`, `content_url`, `content_body`, `display_order` | content_type: video/short_video/canva_slide/text/image/pdf/resource_link/daily_prompt/reflection_card/emotion_check/progress_snapshot/ai_chat/npc_chat |
+| `path_assessments` | `id`, `activity_id`, `assessment_type`, `metadata` | assessment_type: quiz/text_answer/file_upload/image_upload/checklist/daily_reflection/interest_rating/energy_check |
+| `path_quiz_questions` | `id`, `assessment_id`, `question_text`, `options` (ARRAY), `correct_option` | |
+| `map_nodes` | `id`, `map_id`, `title`, `node_type`, `metadata` | Legacy node system |
 | `node_content` | `id`, `node_id`, `content_type`, `content_title`, `content_url`, `content_body` | Legacy content |
 
 ## View Operations
@@ -115,9 +115,9 @@ const { data } = await supabase
       path_activities (
         id,
         title,
-        activity_type,
         display_order,
-        path_content (id, content_type, content_body),
+        instructions,
+        path_content (id, content_type, content_body, content_title),
         path_assessments (id, assessment_type)
       )
     )
@@ -183,25 +183,26 @@ const { data: day } = await supabase
   .select()
   .single();
 
-// Create activity
+// Create activity (NO activity_type - determined by content_type in path_content)
 const { data: activity } = await supabase
   .from('path_activities')
   .insert({
     path_day_id: day.id,
     title: 'Introduction',
-    activity_type: 'learning',
     display_order: 1,
-    instructions: 'Read the introduction...'
+    instructions: 'Read the introduction...',
+    is_required: true,
+    is_draft: false
   })
   .select()
   .single();
 
-// Add content to activity
+// Add content to activity (content_type determines activity type)
 const { data: content } = await supabase
   .from('path_content')
   .insert({
     activity_id: activity.id,
-    content_type: 'text',
+    content_type: 'text', // or 'npc_chat', 'ai_chat', 'daily_prompt', 'reflection_card', etc.
     content_title: 'Introduction',
     content_body: 'Content here...',
     display_order: 0
@@ -277,7 +278,10 @@ await supabase
 | Using `order_index` instead of `display_order` | Column is `display_order` |
 | Forgetting `map_id` on seeds | `map_id` is required |
 | Not using `.select().single()` on insert/update | Always return created record |
-| Using wrong content_type values | Check enum: video/canva_slide/text/image/pdf/resource_link/daily_prompt/reflection_card/emotion_check/progress_snapshot |
+| Using wrong content_type values | Check enum: video/short_video/canva_slide/text/image/pdf/resource_link/daily_prompt/reflection_card/emotion_check/progress_snapshot/ai_chat/npc_chat |
+| Using `activity_type` in path_activities | NO activity_type column - type is determined by path_content.content_type |
+| Using `difficulty` in seeds | No difficulty column in seeds table |
+| Using `role`, `avatar_url`, `greeting_text` in seed_npc_avatars | Use `svg_data` and `description` instead |
 
 ## Required Fields Summary
 
@@ -286,6 +290,7 @@ await supabase
 | `seeds` | `map_id`, `title` |
 | `paths` | `seed_id`, `created_by` |
 | `path_days` | `path_id`, `day_number`, `context_text` |
-| `path_activities` | `path_day_id`, `title`, `activity_type` |
+| `path_activities` | `path_day_id`, `title` |
 | `path_content` | `activity_id`, `content_type` |
 | `expert_pathlabs` | `expert_profile_id` |
+| `seed_npc_avatars` | `seed_id`, `name`, `svg_data` |
