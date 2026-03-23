@@ -1,0 +1,58 @@
+{
+  "scripts": [
+    {
+      "name": "start",
+      "command": "pnpm start",
+      "mode": "service",
+      "category": "dev"
+    },
+    {
+      "name": "android",
+      "command": "pnpm android",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "ios",
+      "command": "pnpm ios",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "web",
+      "command": "pnpm web",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "test",
+      "command": "pnpm test",
+      "mode": "command",
+      "category": "test"
+    },
+    {
+      "name": "test:watch",
+      "command": "pnpm test:watch",
+      "mode": "command",
+      "category": "test"
+    },
+    {
+      "name": "postinstall",
+      "command": "pnpm postinstall",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "generate:pathlab",
+      "command": "pnpm generate:pathlab",
+      "mode": "command",
+      "category": "other"
+    },
+    {
+      "name": "generate:pathlab:batch",
+      "command": "pnpm generate:pathlab:batch",
+      "mode": "command",
+      "category": "other"
+    }
+  ]
+}
