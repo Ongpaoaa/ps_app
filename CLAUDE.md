@@ -36,9 +36,7 @@ Package manager: **pnpm** (not npm or yarn).
 - `app/reflection/[enrollmentId].tsx` — daily reflection modal
 
 ### Design System
-- Background: `#FDFFF5` (off-white)
-- Text: `#111`
-- Accent: `#BFFF00` / `#9FE800` (yellow-green)
+See `docs/design_guidelines.md` for canonical tokens and `lib/theme.ts` for the code implementation.
 - Latin UI: **Libre Franklin** (`LibreFranklin_400Regular` / `LibreFranklin_700Bold`), loaded via `useFonts` and `expo-font` in `app.config.js`
 - Thai: **Bai Jamjuree** when text contains Thai (see `components/AppText.tsx`)
 - Prefer `AppText` or explicit `fontFamily` with explicit `fontWeight` where needed

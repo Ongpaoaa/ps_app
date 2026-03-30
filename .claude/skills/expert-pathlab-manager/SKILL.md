@@ -39,7 +39,7 @@ path_activity_progress → path_assessment_submissions
 | `expert_pathlabs` | `expert_profile_id`, `seed_id`, `path_id`, `generation_status` | generation_status: pending/generating/completed/failed |
 | `seeds` | `id`, `map_id` (REQUIRED), `title`, `description`, `slogan`, `cover_image_url`, `cover_image_key`, `cover_image_blurhash`, `seed_type`, `category_id`, `visibility` | seed_type: collaborative/pathlab; visibility: hidden/visible/featured; cover_image_url links to storage bucket |
 | `seed_categories` | `id`, `name`, `logo_url` | |
-| `seed_npc_avatars` | `seed_id`, `name`, `svg_data`, `description` | NPC guide for PathLab — use `svg_data` not `avatar_url` |
+| `seed_npc_avatars` | `seed_id`, `name`, `svg_data`, `description` | NPC guide for PathLab — use `svg_data` not `avatar_url`. No default NPC exists; each seed needs its own record. App falls back to 👤 emoji (NPC chat) or "AI Assistant" (AI chat) if missing. |
 | `paths` | `id`, `seed_id`, `total_days`, `created_by` | One path per seed |
 | `path_days` | `id`, `path_id`, `day_number`, `title` (nullable), `context_text`, `reflection_prompts` (JSONB array), `node_ids` (UUID[]), `migrated_from_nodes` (bool), `activity_count` (int, auto-maintained by trigger) | reflection_prompts is JSONB not TEXT[] |
 | `path_activities` | `id`, `path_day_id`, `title`, `instructions`, `display_order`, `estimated_minutes`, `is_required`, `is_draft`, `draft_reason` | NO activity_type column — type determined by path_content.content_type or path_assessments.assessment_type |
@@ -61,6 +61,76 @@ video, short_video, canva_slide, text, image, pdf, ai_chat, npc_chat
 text_answer, file_upload, image_upload
 ```
 
+### NPC Chat Content Type
+
+The `npc_chat` content type stores an entire interactive conversation tree in `content_body` as JSON. This is different from `ai_chat` (which uses separate tables) and creates a guided, branching dialogue experience.
+
+**Structure of `npc_chat` content_body:**
+```json
+{
+  "conversation_id": "uuid",
+  "root_node_id": "uuid",
+  "npc_name": "GameDev NPC",
+  "npc_svg_data": "<svg>...</svg>",
+  "summary": "Day 1 — Setup & เข้าใจเครื่องมือ...",
+  "nodes": {
+    "node-id-1": {
+      "node_type": "question",
+      "text_content": "ใน 4 วันนี้ เราจะพาไปรู้จักโลกของการสร้างเกม..."
+    },
+    "node-id-2": {
+      "node_type": "question",
+      "text_content": "วันแรก เราจะเริ่มจากการติดตั้ง Unity..."
+    },
+    "node-id-end": {
+      "node_type": "end",
+      "text_content": "พอจบ 4 วัน ผู้เรียนจะได้ลองทั้ง..."
+    }
+  },
+  "choices": {
+    "choice-id-1": {
+      "from_node_id": "node-id-1",
+      "to_node_id": "node-id-2",
+      "choice_text": "เริ่มเลย!",
+      "display_order": 0
+    }
+  }
+}
+```
+
+**Node types:**
+- `question` - Displays text and shows choices
+- `statement` - Displays text, auto-advances
+- `end` - Conversation ends
+
+**When to use `npc_chat` vs `ai_chat`:**
+| Feature | `npc_chat` | `ai_chat` |
+|---------|------------|------------|
+| Conversation type | Pre-defined branching tree | Dynamic AI responses |
+| Content storage | Embedded in `content_body` JSON | Separate `path_ai_chat_sessions` / `path_ai_chat_messages` tables |
+| Interactivity | Guided, structured dialogue | Open-ended conversation |
+| Use case | Onboarding, tutorials, guided lessons | Coaching, Q&A, open discussion |
+
+### PathLab Content Styles
+
+There are two main styles for building PathLab content:
+
+**1. Passive Style (BAScii example):**
+- `video` / `short_video` content for watching
+- `text` content for reading
+- No submissions required
+- Student swipes through content
+
+**2. Interactive Style (GameDev example):**
+- `npc_chat` for guided dialogue
+- `image` for visual instructions
+- `image_upload` assessment for submissions
+- Students submit evidence of work (screenshots, photos)
+
+Choose the style based on learning objectives:
+- Passive: Knowledge transfer, awareness building
+- Interactive: Skill practice, evidence collection, hands-on learning
+
 ### Template Tables
 
 | Table | Key Fields | Notes |
@@ -75,9 +145,9 @@ text_answer, file_upload, image_upload
 | `path_enrollments` | `id`, `user_id`, `path_id`, `current_day`, `status` | status: active/paused/quit/explored |
 | `path_activity_progress` | `id`, `enrollment_id`, `activity_id`, `status`, `started_at`, `completed_at`, `time_spent_seconds` | status: not_started/in_progress/completed/skipped; UNIQUE(enrollment_id, activity_id) |
 | `path_assessment_submissions` | `id`, `progress_id`, `assessment_id`, `text_answer`, `file_urls` (TEXT[]), `image_url`, `quiz_answers` (JSONB), `metadata` (JSONB) | Learner homework submissions for PathLab activities |
-| `path_reflections` | `id`, `enrollment_id`, `day_number`, `energy_level` (1-5), `confusion_level` (1-5) | |
+| `path_reflections` | `id`, `enrollment_id`, `day_number`, `energy_level` (1-10), `confusion_level` (1-10), `interest_level` (1-5), `open_response`, `decision`, `time_spent_minutes`, `extra_prompt_responses` (TEXT[]) | End-of-day reflection; decision: continue_now/continue_tomorrow/quit |
 | `path_exit_reflections` | `id`, `enrollment_id`, `trigger_day`, `reason_category`, `interest_change` | reason_category: boring/confusing/stressful/not_me |
-| `path_end_reflections` | `id`, `enrollment_id`, `overall_interest` (1-5), `fit_level` (1-5), `surprise_response` | |
+| `path_end_reflections` | `id`, `enrollment_id`, `overall_interest` (1-5), `fit_level` (1-5), `surprise_response` | Final reflection after completing all days |
 | `path_reports` | `id`, `enrollment_id`, `generated_by`, `report_data` (JSONB), `report_text` | |
 
 ### Homework / Submission Model
@@ -100,12 +170,110 @@ Use this mapping:
 | file upload / attachment | `path_assessments.assessment_type = 'file_upload'` + `path_assessment_submissions.file_urls` |
 | image-based homework | `path_assessments.assessment_type = 'image_upload'` + `path_assessment_submissions.image_url` |
 
+**Common `metadata` fields for assessments:**
+```javascript
+// For image_upload
+metadata: {
+  instructions: "Take a screenshot of your work",
+  max_files: 1
+}
+
+// For text_answer
+metadata: {
+  submission_label: "Homework",
+  min_words: 100,
+  max_words: 500,
+  rubric: "Explain what you built and what you learned"
+}
+```
+
 Important:
 
 - `path_activities` alone does **not** make an activity submittable
 - a seed activity only has homework if you also seed a `path_assessments` row for that activity
 - the current `supabase/seed/web-developer-pathlab-seed.sql` file seeds activities and content, but does **not** seed any `path_assessments` rows yet
 - hackathon/team workflows use separate tables: `hackathon_activity_individual_submissions`, `hackathon_activity_team_submissions`, `hackathon_activity_ai_reviews`, `hackathon_activity_mentor_reviews`
+
+### Reflection Model
+
+After completing each day, students are prompted to reflect. This is a core engagement feature.
+
+**What's customizable:**
+- `path_days.reflection_prompts` - Extra questions shown after the sliders (JSONB array of strings)
+
+**What's hardcoded in the app:**
+- 3 fixed sliders: Energy (1-10), Confusion (1-10), Interest (1-10)
+- Slider labels and emojis
+- Decision buttons: "continue_tomorrow", "continue_now", "pause", "quit"
+- Open response text input
+
+**Reflection Flow:**
+1. Student completes all activities for the day
+2. App shows reflection UI with:
+   - Energy level slider (1-10): 😴 → ⚡
+   - Confusion level slider (1-10): 😕 → 💡
+   - Interest level slider (1-10): 😐 → 🤩
+   - Open response text input
+   - Extra prompts from `path_days.reflection_prompts` (if set)
+3. Student makes a decision: `continue_now`, `continue_tomorrow`, `pause`, or `quit`
+4. Data saved to `path_reflections`
+
+**Setting up reflection prompts:**
+```javascript
+// Add reflection prompts to each day
+// These appear as extra questions after the sliders
+const reflectionPrompts = {
+  1: [
+    "What surprised you most about today's activities?",
+    "What would you want to explore further?"
+  ],
+  2: [
+    "What was the most satisfying moment today?",
+    "What was the most frustrating?"
+  ],
+  5: [
+    "Does the idea of working on this problem for the next 5 years excite you or exhaust you?",
+    "What is your biggest takeaway?"
+  ]
+};
+
+for (const [dayNum, prompts] of Object.entries(reflectionPrompts)) {
+  await supabase
+    .from('path_days')
+    .update({ reflection_prompts: prompts })
+    .eq('path_id', pathId)
+    .eq('day_number', parseInt(dayNum));
+}
+```
+
+**Querying reflections:**
+```javascript
+// Get all reflections for an enrollment
+const { data: reflections } = await supabase
+  .from('path_reflections')
+  .select('*')
+  .eq('enrollment_id', enrollmentId)
+  .order('day_number');
+```
+
+**Reflection data structure:**
+```javascript
+{
+  "id": "uuid",
+  "enrollment_id": "uuid",
+  "day_number": 1,
+  "energy_level": 7,           // 1-10
+  "confusion_level": 4,        // 1-10
+  "interest_level": 5,         // 1-10
+  "open_response": "Great day!",
+  "decision": "continue_tomorrow",  // continue_now | continue_tomorrow | pause | quit
+  "time_spent_minutes": 45,
+  "extra_prompt_responses": [
+    "The interview part was most fun"
+  ],
+  "created_at": "2026-02-20T12:49:45Z"
+}
+```
 
 ### AI Chat Tables
 
@@ -517,6 +685,170 @@ for (const [dayNum, title] of Object.entries(dayTitles)) {
 }
 ```
 
+### Set Reflection Prompts
+
+```javascript
+// Add reflection prompts to each day
+// These appear after the student completes all activities for the day
+
+const reflectionPrompts = {
+  1: [
+    "What surprised you most about today's activities?",
+    "What would you want to explore further?"
+  ],
+  2: [
+    "What was the most satisfying moment today?",
+    "What was the most frustrating?",
+    "Did you enjoy the problem-solving aspect?"
+  ],
+  3: [
+    "How did it feel to face rejection?",
+    "What would you do differently next time?"
+  ],
+  4: [
+    "What did you learn about human connection?",
+    "How will you apply this in real life?"
+  ],
+  5: [
+    "Does the idea of working on this problem for the next 5 years excite you or exhaust you?",
+    "What is your biggest takeaway?",
+    "After completing these 5 days, does this path feel right for you?"
+  ]
+};
+
+for (const [dayNum, prompts] of Object.entries(reflectionPrompts)) {
+  await supabase
+    .from('path_days')
+    .update({ reflection_prompts: prompts })
+    .eq('path_id', pathId)
+    .eq('day_number', parseInt(dayNum));
+}
+```
+
+### Create NPC Chat Activity
+
+```javascript
+// Create activity with npc_chat content
+const { data: activity } = await supabase
+  .from('path_activities')
+  .insert({
+    path_day_id: dayId,
+    title: "Welcome & Overview",
+    display_order: 0,
+    is_draft: false
+  })
+  .select()
+  .single();
+
+// Create npc_chat content with embedded conversation tree
+const conversationTree = {
+  conversation_id: crypto.randomUUID(),
+  root_node_id: "node-001",
+  npc_name: "GameDev NPC",
+  npc_svg_data: "<svg>...</svg>",  // NPC avatar SVG
+  summary: "Day 1 — Setup & Introduction to Unity",
+  nodes: {
+    "node-001": {
+      node_type: "question",
+      text_content: "Welcome! In 4 days, you'll learn game development..."
+    },
+    "node-002": {
+      node_type: "question",
+      text_content: "Day 1: We'll start by installing Unity..."
+    },
+    "node-end": {
+      node_type: "end",
+      text_content: "Let's get started!"
+    }
+  },
+  choices: {
+    "choice-1": {
+      from_node_id: "node-001",
+      to_node_id: "node-002",
+      choice_text: "Tell me more!",
+      display_order: 0
+    },
+    "choice-2": {
+      from_node_id: "node-002",
+      to_node_id: "node-end",
+      choice_text: "Let's go!",
+      display_order: 0
+    }
+  }
+};
+
+await supabase
+  .from('path_content')
+  .insert({
+    activity_id: activity.id,
+    content_type: 'npc_chat',
+    content_body: JSON.stringify(conversationTree),
+    display_order: 0
+  });
+```
+
+### Create Activity with Image Upload Submission
+
+```javascript
+// Create activity
+const { data: activity } = await supabase
+  .from('path_activities')
+  .insert({
+    path_day_id: dayId,
+    title: "Install Unity",
+    display_order: 1,
+    is_draft: false
+  })
+  .select()
+  .single();
+
+// Add image content (instructions)
+await supabase
+  .from('path_content')
+  .insert({
+    activity_id: activity.id,
+    content_type: 'image',
+    content_url: 'https://example.com/instructions.png',
+    display_order: 0
+  });
+
+// Add image_upload assessment (submission)
+await supabase
+  .from('path_assessments')
+  .insert({
+    activity_id: activity.id,
+    assessment_type: 'image_upload',
+    is_graded: false,
+    metadata: {
+      instructions: 'Take a screenshot of Unity installed on your computer'
+    }
+  });
+```
+
+### Create NPC Avatar for Seed
+
+```javascript
+// Each seed needs its own NPC avatar for AI chat and NPC chat activities
+// Without one, the app falls back to generic "AI Assistant" or 👤 emoji
+
+const { data: avatar } = await supabase
+  .from('seed_npc_avatars')
+  .insert({
+    seed_id: seedId,
+    name: "Mai",
+    description: "BAScii senior and startup enthusiast. Friendly, encouraging, shares real experiences.",
+    svg_data: `<svg viewBox="0 0 200 200">
+      <!-- NPC avatar SVG here -->
+    </svg>`
+  })
+  .select()
+  .single();
+
+// The NPC avatar will appear in:
+// 1. AI chat activities (messenger-style header)
+// 2. NPC chat activities (full-body character)
+```
+
 ## Common Mistakes
 
 | Mistake | Fix |
@@ -542,6 +874,10 @@ for (const [dayNum, title] of Object.entries(dayTitles)) {
 | Putting video URLs in `content_body` instead of `content_url` | For video/short_video content, YouTube URLs MUST go in `content_url` field — the app's YoutubePlayer only reads from `content_url`, not `content_body` |
 | Forgetting to set `cover_image_url` on seeds | Seeds without cover images look broken in the app — upload to `seed-assets` bucket and set `cover_image_url` |
 | Leaving `path_days.title` as null | Days without titles fall back to seed title in the app — set meaningful day titles like "Finding Real Problems", "Customer Validation", etc. |
+| Confusing `npc_chat` with `ai_chat` | `npc_chat` stores conversation tree in `content_body` JSON; `ai_chat` uses separate tables (`path_ai_chat_sessions`, `path_ai_chat_messages`) for dynamic AI responses |
+| Not adding assessments for interactive activities | If an activity should collect student submissions, you must create a `path_assessments` row — the activity alone won't accept submissions |
+| Forgetting to set `reflection_prompts` on days | Days without reflection prompts skip the extra questions in end-of-day reflection — add 2-4 meaningful prompts per day |
+| Not creating NPC avatar for seed | Without `seed_npc_avatars`, AI/NPC chat shows generic fallback ("AI Assistant" or 👤 emoji) — create an NPC with name and SVG for each seed |
 
 ## Required Fields Summary
 
