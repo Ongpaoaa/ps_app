@@ -1,0 +1,38 @@
+<h2>Design: Auth Flow</h2>
+<p class="subtitle">Section 1 of 3 — Login screen + AuthContext changes</p>
+
+<div class="section">
+  <h3>Landing Page (app/index.tsx)</h3>
+  <div class="mockup">
+    <div class="mockup-header">app/index.tsx — Login Screen</div>
+    <div class="mockup-body" style="display:flex;flex-direction:column;gap:10px;padding:16px">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:22px;font-weight:bold">Passion Seed</div>
+        <div style="color:#666;font-size:13px;margin-top:4px">Find Your Path Before You Commit</div>
+      </div>
+      <div class="mock-button" style="background:#4285F4;color:white;border:none">🔵 Continue with Google</div>
+      <div class="mock-button" style="background:#000;color:white;border:none"> Continue with Apple</div>
+      <div class="mock-button" style="background:#f9f9f9;color:#333;border:1px solid #ddd">Explore without signing in</div>
+      <div style="text-align:center;color:#999;font-size:11px;margin:4px 0">── or ──</div>
+      <div class="mock-button" style="background:#8b5cf6;color:white;border:none">🏆 Hackathon Login</div>
+    </div>
+  </div>
+  <p style="margin-top:10px;font-size:13px;color:#555">
+    The hackathon button navigates to a new screen <strong>app/hackathon-login.tsx</strong> with an email + password form. On submit it calls <code>supabase.auth.signInWithPassword()</code>. After success, we check <code>hackathon_team_members</code> — if the user is found, we set <code>isHackathon: true</code> and proceed. If not found, show an error: "This account is not registered for a hackathon."
+  </p>
+</div>
+
+<div class="section">
+  <h3>AuthContext changes (lib/auth.tsx)</h3>
+  <div style="background:#1e1e2e;color:#cdd6f4;font-family:monospace;font-size:12px;padding:14px;border-radius:8px;line-height:1.7">
+    <span style="color:#89b4fa">// New additions to AuthContext</span><br>
+    isHackathon: <span style="color:#a6e3a1">boolean</span>;<br>
+    signInWithEmailPassword: (email: <span style="color:#a6e3a1">string</span>, password: <span style="color:#a6e3a1">string</span>) =&gt; <span style="color:#a6e3a1">Promise&lt;void&gt;</span>;<br><br>
+    <span style="color:#89b4fa">// isHackathon is set to true when:</span><br>
+    <span style="color:#89b4fa">// 1. signInWithEmailPassword succeeds</span><br>
+    <span style="color:#89b4fa">// 2. user exists in hackathon_team_members</span><br>
+    <span style="color:#89b4fa">// It persists via AsyncStorage (same as guestLanguage)</span>
+  </div>
+</div>
+
+<p style="margin-top:16px;font-size:13px;color:#555">Does this auth section look right?</p>

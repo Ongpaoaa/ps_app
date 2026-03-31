@@ -1,0 +1,7 @@
+{"type":"server-started","port":64601,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64601","screen_dir":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/content","state_dir":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/state"}
+{"type":"screen-added","file":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/content/approaches.html"}
+{"type":"screen-added","file":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/content/design-auth.html"}
+{"type":"screen-added","file":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/content/design-routing.html"}
+{"type":"screen-added","file":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/content/design-data.html"}
+{"type":"screen-added","file":"/Users/pine/Documents/app_ps/ps_app/.superpowers/brainstorm/52711-1774954196/content/waiting.html"}
+{"type":"server-stopped","reason":"owner process exited"}

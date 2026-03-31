@@ -1,0 +1,41 @@
+<h2>3 Approaches: Hackathon Mode</h2>
+<p class="subtitle">How should hackathon login + mode be wired into the app?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Separate login button → isHackathon flag in AuthContext</h3>
+      <p>Add a "Hackathon Login" button on the landing page (email + password). After <code>signInWithPassword</code>, check <code>hackathon_team_members</code> for the user. If found, set <code>isHackathon: true</code> in AuthContext. RootNavigator routes hackathon users to <code>/(hackathon)/</code> tabs instead of <code>/(tabs)/</code>.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Clean separation — one flag drives all routing</li><li>Follows existing guest/session pattern in auth.tsx</li><li>No new context files needed</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>AuthContext grows slightly</li></ul></div>
+      </div>
+      <p style="margin-top:8px;font-weight:bold;color:#8b5cf6">⭐ Recommended</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Separate HackathonAuthContext</h3>
+      <p>Keep normal auth completely untouched. Create a parallel <code>HackathonAuthProvider</code> with its own email/password state. The landing page shows both buttons; hackathon users get their own context tree.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Zero risk of affecting existing auth</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Two auth contexts = complex nesting</li><li>Duplicates session management logic</li><li>Harder to maintain</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hackathon as a separate Expo route group with own layout</h3>
+      <p>Add a <code>/(hackathon-login)/</code> stack that handles its own auth entirely. No changes to <code>lib/auth.tsx</code> at all. The landing page navigates to a hackathon-specific login screen that manages its own session.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Fully isolated — can't break normal users</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Duplicate Supabase session handling</li><li>Tricky with expo-router's single root layout</li><li>Two sessions could conflict</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

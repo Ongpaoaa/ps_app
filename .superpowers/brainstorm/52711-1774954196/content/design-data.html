@@ -1,0 +1,45 @@
+<h2>Design: Data & State</h2>
+<p class="subtitle">Section 3 of 3 — How hackathon data flows into the app</p>
+
+<div class="section">
+  <h3>Porting data layer from pseed</h3>
+  <p style="font-size:13px;color:#555">The hackathon data logic already exists in the web project. We copy/adapt these files:</p>
+  <div class="mockup">
+    <div class="mockup-header">Files to port from /Documents/pseed → ps_app</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;line-height:2;padding:12px">
+      <span style="color:#a6e3a1">pseed/types/hackathon-program.ts</span><br>
+      &nbsp;&nbsp;→ <span style="color:#fab387">ps_app/types/hackathon-program.ts</span><br><br>
+      <span style="color:#a6e3a1">pseed/lib/hackathonProgram.ts</span><br>
+      &nbsp;&nbsp;→ <span style="color:#fab387">ps_app/lib/hackathonProgram.ts</span><br><br>
+      <span style="color:#a6e3a1">pseed/lib/hackathonProgramPreview.ts</span><br>
+      &nbsp;&nbsp;→ <span style="color:#fab387">ps_app/lib/hackathonProgramPreview.ts</span><br>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>isHackathon persistence</h3>
+  <div style="background:#1e1e2e;color:#cdd6f4;font-family:monospace;font-size:12px;padding:14px;border-radius:8px;line-height:1.8">
+    <span style="color:#89b4fa">// Stored in AsyncStorage (same as guestLanguage)</span><br>
+    key: <span style="color:#a6e3a1">"hackathon_mode"</span> → <span style="color:#fab387">"true" | null</span><br><br>
+    <span style="color:#89b4fa">// On app start: read from storage + confirm session exists</span><br>
+    <span style="color:#89b4fa">// On sign out: clear both session + hackathon_mode key</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Sign out behavior</h3>
+  <p style="font-size:13px;color:#555">Hackathon sign out clears the Supabase session <em>and</em> the <code>hackathon_mode</code> storage key, then routes back to the landing page — same as normal sign out.</p>
+</div>
+
+<div class="section">
+  <h3>What we are NOT building (YAGNI)</h3>
+  <ul style="font-size:13px;color:#555;line-height:2">
+    <li>No hackathon AI feedback screen (pseed already has it on web)</li>
+    <li>No leaderboard (not requested)</li>
+    <li>No onboarding flow for hackathon users</li>
+    <li>Profile tab is minimal — just team info + sign out</li>
+  </ul>
+</div>
+
+<p style="margin-top:16px;font-size:13px;color:#555">Does this data + state section look right?</p>

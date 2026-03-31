@@ -1,0 +1,49 @@
+<h2>Design: Routing & Navigation</h2>
+<p class="subtitle">Section 2 of 3 — How hackathon users get routed to a different app</p>
+
+<div class="section">
+  <h3>RootNavigator routing logic (_layout.tsx)</h3>
+  <div style="background:#1e1e2e;color:#cdd6f4;font-family:monospace;font-size:12px;padding:14px;border-radius:8px;line-height:1.8">
+    <span style="color:#89b4fa">// Current flow</span><br>
+    if (!session && !isGuest) → <span style="color:#f38ba8">index (landing)</span><br>
+    if (isGuest) → <span style="color:#a6e3a1">/(tabs)/discover</span><br>
+    if (session && onboarded) → <span style="color:#a6e3a1">/(tabs)/discover</span><br><br>
+    <span style="color:#89b4fa">// New flow (added before guest check)</span><br>
+    if (<span style="color:#fab387">isHackathon</span> && session) → <span style="color:#fab387">/(hackathon)/home</span><br>
+  </div>
+</div>
+
+<div class="section">
+  <h3>New route group: app/(hackathon)/</h3>
+  <div class="mockup">
+    <div class="mockup-header">File structure</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:12px;line-height:2;padding:12px">
+      app/<br>
+      &nbsp;&nbsp;(hackathon)/<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6">_layout.tsx</span> &nbsp;← Tab navigator (hackathon tabs)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6">home.tsx</span> &nbsp;&nbsp;&nbsp;← Hackathon home (port from pseed)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b5cf6">phase/[phaseId].tsx</span> &nbsp;← Phase detail<br>
+      &nbsp;&nbsp;hackathon-login.tsx &nbsp;← Email/password login screen<br>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Tab structure for hackathon users</h3>
+  <div class="mockup">
+    <div class="mockup-header">Bottom Tab Bar (hackathon mode)</div>
+    <div class="mockup-body" style="display:flex;justify-content:space-around;padding:16px;background:#fff;border-top:1px solid #eee">
+      <div style="text-align:center;color:#8b5cf6">
+        <div style="font-size:20px">🏠</div>
+        <div style="font-size:11px;font-weight:bold">Home</div>
+      </div>
+      <div style="text-align:center;color:#999">
+        <div style="font-size:20px">👤</div>
+        <div style="font-size:11px">Profile</div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:#555;margin-top:8px">Minimal tabs — just Home (hackathon journey) and Profile (sign out). No discover/my-paths/etc.</p>
+</div>
+
+<p style="margin-top:16px;font-size:13px;color:#555">Does this routing + navigation structure look right?</p>
