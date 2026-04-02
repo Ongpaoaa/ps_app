@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase Card — Node Graph</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #03050a;
+    color: #fff;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 32px 24px 60px;
+  }
+  h1 { text-align: center; font-size: 18px; color: #91C4E3; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 36px; }
+
+  .home-screen {
+    background: linear-gradient(160deg, #03050a 0%, #050d18 60%, #070515 100%);
+    padding: 36px 22px 28px;
+    position: relative;
+    overflow: hidden;
+    max-width: 340px;
+    margin: 0 auto;
+    border-radius: 24px;
+    border: 1px solid rgba(145,196,227,0.1);
+  }
+
+  .glow-orb {
+    position: absolute; border-radius: 50%; filter: blur(50px); pointer-events: none;
+  }
+  .glow-1 { top: -40px; left: -40px; width: 180px; height: 180px; background: #91C4E3; opacity: 0.05; }
+  .glow-2 { bottom: -20px; right: -30px; width: 140px; height: 140px; background: #A594BA; opacity: 0.07; }
+
+  .prog-eyebrow {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(145,196,227,0.5); margin-bottom: 4px;
+  }
+  .prog-title {
+    font-size: 26px; font-weight: bold; color: #fff;
+    text-shadow: 0 0 30px rgba(145,196,227,0.25);
+    margin-bottom: 22px;
+  }
+
+  /* Phase card */
+  .phase-card {
+    background: linear-gradient(135deg, rgba(13,18,25,0.95) 0%, rgba(18,28,41,0.85) 100%);
+    border: 1px solid rgba(74,107,130,0.35);
+    border-radius: 20px;
+    padding: 16px 16px 14px;
+    box-shadow: 0 0 30px rgba(74,107,130,0.12);
+    position: relative; overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .card-glow {
+    position: absolute; top: -30px; left: -30px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: rgba(145,196,227,0.07); filter: blur(25px);
+    pointer-events: none;
+  }
+
+  .card-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .phase-title-group {}
+  .phase-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(145,196,227,0.45); margin-bottom: 3px;
+  }
+  .phase-name { font-size: 15px; font-weight: bold; color: #fff; }
+  .phase-pct { font-size: 11px; color: rgba(145,196,227,0.6); margin-top: 2px; }
+  .phase-due { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+  /* Node graph */
+  .node-graph {
+    width: 100%;
+    height: 90px;
+    position: relative;
+    margin-bottom: 12px;
+    overflow: visible;
+  }
+  .node-graph svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Progress bar */
+  .progress-track {
+    height: 2px; background: rgba(255,255,255,0.07); border-radius: 1px;
+    margin-bottom: 10px;
+  }
+  .progress-fill {
+    height: 2px; background: #91C4E3; border-radius: 1px;
+    width: 25%;
+    box-shadow: 0 0 6px rgba(145,196,227,0.6);
+  }
+
+  /* Card footer */
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .act-count { font-size: 10px; color: rgba(255,255,255,0.28); }
+  .tap-hint { font-size: 10px; color: #65ABFC; }
+
+  /* Dot indicators */
+  .dots { display: flex; justify-content: center; gap: 6px; margin: 8px 0 16px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .dot.active { background: #91C4E3; box-shadow: 0 0 6px rgba(145,196,227,0.6); }
+
+  /* Team card */
+  .team-card {
+    background: linear-gradient(135deg, rgba(13,18,25,0.9), rgba(18,28,41,0.8));
+    border: 1px solid rgba(74,107,130,0.25);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .team-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(145,196,227,0.45); margin-bottom: 5px;
+  }
+  .team-name-row { display: flex; justify-content: space-between; align-items: center; }
+  .team-name { font-size: 16px; font-weight: bold; color: #fff; }
+  .team-id { font-size: 11px; color: rgba(255,255,255,0.25); }
+
+  /* Legend */
+  .legend {
+    max-width: 340px; margin: 20px auto 0;
+    display: flex; flex-wrap: wrap; gap: 12px;
+    justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,0.45); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<h1>Phase Card — Node Graph</h1>
+<p class="subtitle">Direction A with activity nodes visualized inside the card</p>
+
+<div class="home-screen">
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+
+  <div class="prog-eyebrow">Epic Sprint</div>
+  <div class="prog-title">Your Journey</div>
+
+  <div class="phase-card">
+    <div class="card-glow"></div>
+
+    <div class="card-header">
+      <div class="phase-title-group">
+        <div class="phase-label">Phase 1</div>
+        <div class="phase-name">Ideation</div>
+        <div class="phase-pct">25% complete</div>
+      </div>
+      <div class="phase-due">8/4</div>
+    </div>
+
+    <!-- Node graph SVG: 4 activities connected by dashed lines -->
+    <div class="node-graph">
+      <svg viewBox="0 0 280 90" xmlns="http://www.w3.org/2000/svg">
+        <!-- Connecting lines (dashed) -->
+        <!-- node 1 → node 2 -->
+        <line x1="50" y1="45" x2="110" y2="45" stroke="rgba(145,196,227,0.25)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <!-- node 2 → node 3 -->
+        <line x1="140" y1="45" x2="185" y2="45" stroke="rgba(145,196,227,0.15)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <!-- node 3 → node 4 -->
+        <line x1="215" y1="45" x2="248" y2="45" stroke="rgba(145,196,227,0.15)" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+        <!-- Node 1: Know Yourself — COMPLETED (filled cyan) -->
+        <circle cx="38" cy="45" r="14" fill="rgba(145,196,227,0.15)" stroke="#91C4E3" stroke-width="1.5"/>
+        <circle cx="38" cy="45" r="7" fill="#91C4E3"/>
+        <!-- checkmark -->
+        <polyline points="33,45 37,49 43,41" fill="none" stroke="#03050a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- label -->
+        <text x="38" y="70" text-anchor="middle" font-size="7.5" fill="rgba(145,196,227,0.7)" font-family="system-ui">Know</text>
+        <text x="38" y="79" text-anchor="middle" font-size="7.5" fill="rgba(145,196,227,0.7)" font-family="system-ui">Yourself</text>
+
+        <!-- Node 2: Find a Problem — CURRENT (pulsing ring) -->
+        <circle cx="125" cy="45" r="16" fill="rgba(145,196,227,0.05)" stroke="rgba(145,196,227,0.4)" stroke-width="1" stroke-dasharray="3 2"/>
+        <circle cx="125" cy="45" r="11" fill="rgba(13,18,25,0.9)" stroke="#91C4E3" stroke-width="2"/>
+        <circle cx="125" cy="45" r="4" fill="#91C4E3" opacity="0.8"/>
+        <text x="125" y="71" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.55)" font-family="system-ui">Find a</text>
+        <text x="125" y="80" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.55)" font-family="system-ui">Problem</text>
+
+        <!-- Node 3: Brainstorm — LOCKED (dim outline) -->
+        <circle cx="200" cy="45" r="11" fill="rgba(13,18,25,0.6)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+        <text x="200" y="66" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.25)" font-family="system-ui">Brainstorm</text>
+
+        <!-- Node 4: Pick Solution — LOCKED (dim outline) -->
+        <circle cx="255" cy="45" r="11" fill="rgba(13,18,25,0.6)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+        <text x="255" y="66" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.25)" font-family="system-ui">Pick</text>
+      </svg>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-track"><div class="progress-fill"></div></div>
+
+    <div class="card-footer">
+      <div class="act-count">4 activities</div>
+      <div class="tap-hint">Tap to open →</div>
+    </div>
+  </div>
+
+  <!-- Dots -->
+  <div class="dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Team card -->
+  <div class="team-card">
+    <div class="team-label">Team</div>
+    <div class="team-name-row">
+      <div class="team-name">Preview Team</div>
+      <div class="team-id">ID: previe</div>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#91C4E3;"></div>
+    Completed
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:rgba(13,18,25,0.9);border:2px solid #91C4E3;"></div>
+    Current
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:rgba(13,18,25,0.6);border:1.5px solid rgba(255,255,255,0.15);"></div>
+    Upcoming
+  </div>
+</div>
+
+</body>
+</html>

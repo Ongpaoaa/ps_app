@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hackathon Design Directions</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #03050a;
+    color: #fff;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 32px 24px 60px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    color: #91C4E3;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    margin-bottom: 36px;
+  }
+
+  .directions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .direction {
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .direction:hover { transform: translateY(-2px); }
+  .direction.selected { border-color: #91C4E3; }
+  .direction.selected::after {
+    content: '✓ Selected';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #91C4E3;
+    color: #03050a;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .label-bar {
+    padding: 10px 16px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+
+  /* ── Direction A: Deep Glow ── */
+  .dir-a .label-bar { background: #0d1219; color: #91C4E3; }
+
+  .dir-a .phone-frame {
+    background: #0d1219;
+    padding: 0;
+  }
+
+  /* Login screen A */
+  .dir-a .login-screen {
+    background: linear-gradient(160deg, #03050a 0%, #050d18 60%, #070515 100%);
+    padding: 40px 24px 32px;
+    min-height: 460px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dir-a .glow-orb-1 {
+    position: absolute; top: -40px; left: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: #91C4E3; opacity: 0.06; filter: blur(50px);
+    pointer-events: none;
+  }
+  .dir-a .glow-orb-2 {
+    position: absolute; bottom: 20px; right: -30px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: #A594BA; opacity: 0.08; filter: blur(40px);
+    pointer-events: none;
+  }
+  .dir-a .back-btn {
+    color: #65ABFC; font-size: 13px; margin-bottom: 28px;
+    opacity: 0.8;
+  }
+  .dir-a .eyebrow {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(145,196,227,0.5); margin-bottom: 6px;
+  }
+  .dir-a .login-title {
+    font-size: 28px; font-weight: bold; color: #fff;
+    margin-bottom: 4px;
+    text-shadow: 0 0 30px rgba(145,196,227,0.3);
+  }
+  .dir-a .login-sub {
+    font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 28px; line-height: 1.5;
+  }
+  .dir-a .field {
+    background: rgba(26,37,48,0.8);
+    border: 2px solid rgba(90,122,148,0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .dir-a .field-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(145,196,227,0.6); margin-bottom: 3px;
+  }
+  .dir-a .field-value {
+    font-size: 14px; color: rgba(255,255,255,0.35);
+  }
+  .dir-a .cta {
+    background: #9D81AC;
+    border-radius: 40px;
+    padding: 13px 0;
+    text-align: center;
+    font-size: 15px; font-weight: bold;
+    color: #fff;
+    margin-top: 18px;
+    box-shadow: 0 0 40px rgba(157,129,172,0.5);
+  }
+
+  /* Home screen A */
+  .dir-a .home-screen {
+    background: linear-gradient(160deg, #03050a 0%, #050d18 60%, #070515 100%);
+    padding: 32px 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dir-a .home-screen .glow-orb-1 {
+    top: -20px; left: -20px; width: 160px; height: 160px;
+  }
+  .dir-a .prog-eyebrow {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(145,196,227,0.5); margin-bottom: 4px;
+  }
+  .dir-a .prog-title {
+    font-size: 24px; font-weight: bold; color: #fff;
+    text-shadow: 0 0 30px rgba(145,196,227,0.3);
+    margin-bottom: 20px;
+  }
+  .dir-a .phase-card {
+    background: linear-gradient(135deg, rgba(13,18,25,0.9) 0%, rgba(18,28,41,0.8) 100%);
+    border: 1px solid rgba(74,107,130,0.3);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 30px rgba(74,107,130,0.1);
+    position: relative; overflow: hidden;
+  }
+  .dir-a .phase-card-glow {
+    position: absolute; top: -20px; left: -20px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(145,196,227,0.08); filter: blur(20px);
+    pointer-events: none;
+  }
+  .dir-a .phase-num {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(145,196,227,0.5); margin-bottom: 4px;
+  }
+  .dir-a .phase-name {
+    font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 8px;
+  }
+  .dir-a .activity-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+  }
+  .dir-a .activity-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #91C4E3; opacity: 0.5; flex-shrink: 0;
+  }
+  .dir-a .activity-name { font-size: 11px; color: rgba(255,255,255,0.55); }
+  .dir-a .phase-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .dir-a .phase-count { font-size: 10px; color: rgba(255,255,255,0.3); }
+  .dir-a .phase-arrow { font-size: 11px; color: #65ABFC; }
+
+  .dir-a .team-card {
+    background: linear-gradient(135deg, rgba(13,18,25,0.9) 0%, rgba(18,28,41,0.8) 100%);
+    border: 1px solid rgba(74,107,130,0.3);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 4px;
+  }
+  .dir-a .team-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(145,196,227,0.5); margin-bottom: 4px;
+  }
+  .dir-a .team-name { font-size: 16px; font-weight: bold; color: #fff; }
+
+  /* ── Direction B: Vibrant Pulse ── */
+  .dir-b .label-bar { background: #070515; color: #A594BA; }
+
+  .dir-b .login-screen {
+    background: radial-gradient(ellipse at 20% 20%, rgba(101,171,252,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(165,148,186,0.1) 0%, transparent 60%),
+                #03050a;
+    padding: 40px 24px 32px;
+    min-height: 460px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dir-b .particles {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .dir-b .particle {
+    position: absolute; border-radius: 50%;
+    background: #91C4E3; opacity: 0.4;
+  }
+  .dir-b .back-btn {
+    color: #A594BA; font-size: 13px; margin-bottom: 24px;
+    opacity: 0.8;
+  }
+  .dir-b .brand-mark {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #65ABFC, #A594BA);
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(101,171,252,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .dir-b .eyebrow {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(165,148,186,0.6); margin-bottom: 6px;
+  }
+  .dir-b .login-title {
+    font-size: 28px; font-weight: bold;
+    background: linear-gradient(90deg, #91C4E3, #A594BA);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+  .dir-b .login-sub {
+    font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 28px; line-height: 1.5;
+  }
+  .dir-b .field {
+    background: rgba(26,37,48,0.6);
+    border: 1.5px solid rgba(101,171,252,0.2);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .dir-b .field-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(101,171,252,0.5); margin-bottom: 4px;
+  }
+  .dir-b .field-value { font-size: 14px; color: rgba(255,255,255,0.3); }
+  .dir-b .cta {
+    background: linear-gradient(135deg, #9D81AC, #7a5f8a);
+    border-radius: 40px;
+    padding: 14px 0;
+    text-align: center;
+    font-size: 15px; font-weight: bold;
+    color: #fff;
+    margin-top: 20px;
+    box-shadow: 0 0 40px rgba(157,129,172,0.6);
+  }
+
+  /* Home screen B */
+  .dir-b .home-screen {
+    background: radial-gradient(ellipse at 10% 10%, rgba(101,171,252,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 90%, rgba(165,148,186,0.08) 0%, transparent 50%),
+                #03050a;
+    padding: 32px 20px 24px;
+  }
+  .dir-b .prog-eyebrow {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: rgba(165,148,186,0.5); margin-bottom: 4px;
+  }
+  .dir-b .prog-title {
+    font-size: 24px; font-weight: bold;
+    background: linear-gradient(90deg, #fff 60%, #91C4E3);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+  .dir-b .phase-card {
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 10px;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(101,171,252,0.15);
+    background: rgba(13,18,25,0.7);
+  }
+  .dir-b .phase-card-accent {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, #65ABFC, #A594BA);
+    border-radius: 20px 20px 0 0;
+  }
+  .dir-b .phase-num {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(101,171,252,0.5); margin-bottom: 4px; margin-top: 4px;
+  }
+  .dir-b .phase-name {
+    font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 10px;
+  }
+  .dir-b .activity-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+  }
+  .dir-b .activity-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: #65ABFC; opacity: 0.6; flex-shrink: 0;
+  }
+  .dir-b .activity-name { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .dir-b .phase-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .dir-b .phase-count { font-size: 10px; color: rgba(255,255,255,0.25); }
+  .dir-b .phase-arrow {
+    font-size: 11px;
+    background: linear-gradient(90deg, #65ABFC, #A594BA);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dir-b .team-card {
+    background: linear-gradient(135deg, rgba(101,171,252,0.05), rgba(165,148,186,0.08));
+    border: 1px solid rgba(101,171,252,0.15);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-top: 4px;
+  }
+  .dir-b .team-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(101,171,252,0.5); margin-bottom: 4px;
+  }
+  .dir-b .team-name { font-size: 16px; font-weight: bold; color: #fff; }
+
+  /* screen labels */
+  .screen-label {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.25); text-align: center;
+    padding: 6px 0; background: rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+
+<h1>Design Direction</h1>
+<p class="subtitle">Which visual feel do you want for the hackathon login & home?</p>
+
+<div class="directions">
+
+  <!-- Direction A -->
+  <div class="direction dir-a" data-choice="a" onclick="this.classList.toggle('selected')">
+    <div class="label-bar">A — Deep Glow</div>
+
+    <div class="screen-label">Login</div>
+    <div class="phone-frame">
+      <div class="login-screen">
+        <div class="glow-orb-1"></div>
+        <div class="glow-orb-2"></div>
+        <div class="back-btn">‹ Back</div>
+        <div class="eyebrow">Hackathon</div>
+        <div class="login-title">Sign in</div>
+        <div class="login-sub">Use your registered hackathon<br>email and password.</div>
+        <div class="field">
+          <div class="field-label">Email</div>
+          <div class="field-value">you@example.com</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Password</div>
+          <div class="field-value">••••••••</div>
+        </div>
+        <div class="cta">Sign In →</div>
+      </div>
+    </div>
+
+    <div class="screen-label">Home</div>
+    <div class="phone-frame">
+      <div class="home-screen">
+        <div class="glow-orb-1"></div>
+        <div class="prog-eyebrow">Epic Sprint</div>
+        <div class="prog-title">Your Journey</div>
+        <div class="phase-card">
+          <div class="phase-card-glow"></div>
+          <div class="phase-num">Phase 1</div>
+          <div class="phase-name">Ideation</div>
+          <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Know Yourself</div></div>
+          <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Find a Problem</div></div>
+          <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Brainstorm Solutions</div></div>
+          <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Pick Your Solution</div></div>
+          <div class="phase-footer">
+            <div class="phase-count">4 activities</div>
+            <div class="phase-arrow">Tap to open →</div>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-label">Team</div>
+          <div class="team-name">Preview Team</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="label-bar" style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.45); padding:12px 16px;">
+      Subtle, moody. Glow orbs + soft glass cards. Dark cyan/purple accents. More restrained.
+    </div>
+  </div>
+
+  <!-- Direction B -->
+  <div class="direction dir-b" data-choice="b" onclick="this.classList.toggle('selected')">
+    <div class="label-bar">B — Vibrant Pulse</div>
+
+    <div class="screen-label">Login</div>
+    <div class="login-screen">
+      <div class="particles">
+        <div class="particle" style="width:3px;height:3px;top:15%;left:20%"></div>
+        <div class="particle" style="width:2px;height:2px;top:35%;left:75%"></div>
+        <div class="particle" style="width:2px;height:2px;top:60%;left:40%"></div>
+        <div class="particle" style="width:3px;height:3px;top:80%;left:85%"></div>
+        <div class="particle" style="width:2px;height:2px;top:50%;left:10%"></div>
+      </div>
+      <div class="back-btn">‹ Back</div>
+      <div class="brand-mark">✦</div>
+      <div class="eyebrow">Hackathon</div>
+      <div class="login-title">Sign in</div>
+      <div class="login-sub">Use your registered hackathon<br>email and password.</div>
+      <div class="field">
+        <div class="field-label">Email</div>
+        <div class="field-value">you@example.com</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Password</div>
+        <div class="field-value">••••••••</div>
+      </div>
+      <div class="cta">Sign In →</div>
+    </div>
+
+    <div class="screen-label">Home</div>
+    <div class="home-screen">
+      <div class="prog-eyebrow">Epic Sprint</div>
+      <div class="prog-title">Your Journey</div>
+      <div class="phase-card">
+        <div class="phase-card-accent"></div>
+        <div class="phase-num">Phase 1</div>
+        <div class="phase-name">Ideation</div>
+        <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Know Yourself</div></div>
+        <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Find a Problem</div></div>
+        <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Brainstorm Solutions</div></div>
+        <div class="activity-row"><div class="activity-dot"></div><div class="activity-name">Pick Your Solution</div></div>
+        <div class="phase-footer">
+          <div class="phase-count">4 activities</div>
+          <div class="phase-arrow">Tap to open →</div>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="team-label">Team</div>
+        <div class="team-name">Preview Team</div>
+      </div>
+    </div>
+
+    <div class="label-bar" style="font-size:11px; font-weight:normal; color:rgba(255,255,255,0.45); padding:12px 16px;">
+      Bolder. Gradient text, particle dots, color-accent top bars. Cyan-to-purple gradient energy.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // simple click to select, no dependency on frame helper
+</script>
+</body>
+</html>
