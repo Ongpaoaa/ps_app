@@ -4,7 +4,10 @@ Instructions for AI coding agents working in this repository.
 
 ## Project-local skills
 
-Skills with repo-specific guidance live under `.claude/skills/<name>/SKILL.md`. For **`@shopify/react-native-skia`** (Canvas, shaders, jank-safe animation with Reanimated), use **`react-native-skia`** — path: `.claude/skills/react-native-skia/SKILL.md`.
+Skills with repo-specific guidance live under `.claude/skills/<name>/SKILL.md`.
+
+- **`webtoon-cutter`** — Cut long webtoon images into chunks, upload to Supabase storage, generate DB-ready metadata. Path: `.claude/skills/webtoon-cutter/SKILL.md`.
+- **`react-native-skia`** — Canvas, shaders, jank-safe animation with Reanimated. Path: `.claude/skills/react-native-skia/SKILL.md`.
 
 ## Versioning Rule
 
