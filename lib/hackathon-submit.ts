@@ -72,12 +72,11 @@ async function awardScore(
 
   if (pointsAwarded <= 0) return;
 
-  // 4. Check if score already awarded for this team+activity (idempotent)
+  // 4. Check if score already awarded for this submission (idempotent)
   const { data: existingEvent } = await supabase
     .from("hackathon_team_score_events")
     .select("id")
-    .eq("team_id", membership.team_id)
-    .eq("activity_id", activityId)
+    .eq("submission_id", submissionId)
     .maybeSingle();
 
   if (existingEvent) return; // already scored, skip
