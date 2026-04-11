@@ -9,7 +9,7 @@
     "web": "expo start --web",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "node --experimental-strip-types node_modules/@shopify/react-native-skia/scripts/install-libs.js",
+    "postinstall": "node node_modules/@shopify/react-native-skia/scripts/install-libs.js || true",
     "generate:pathlab": "npx tsx scripts/generate-pathlab/index.ts",
     "generate:pathlab:batch": "npx tsx scripts/generate-pathlab/batch.ts",
     "build:android-local": "GOOGLE_SERVICES_JSON=$(pwd)/google-services.json eas build --local -p android"
