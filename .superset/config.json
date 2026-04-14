@@ -1,0 +1,9 @@
+{
+  "setup": [
+    "pnpm i\npnpm prebuild"
+  ],
+  "teardown": [],
+  "run": [
+    "pnpm start"
+  ]
+}
