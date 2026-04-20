@@ -240,6 +240,10 @@ module.exports = {
       eas: {
         projectId: "baca732a-c7d8-4bd2-9742-48cc2a5e939f",
       },
+      // Runtime environment variables
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL || "https://iikrvgjfkuijcpvdwzvv.supabase.co",
+      supabasePublishableKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_3BzLdHOi5zinIv2WFRxVYQ_8gJq3nc_",
+      supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpa3J2Z2pma3VpamNwdmR3enZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1Mjc3NDcsImV4cCI6MjA1OTEwMzc0N30.PGCORDtOCHvZBIV1WAZaxgrjGTm_ErYOPWeYeCJh_ew",
     },
     autolinking: {
       exclude: ["expo-glass-effect", "expo-apple-authentication"],
